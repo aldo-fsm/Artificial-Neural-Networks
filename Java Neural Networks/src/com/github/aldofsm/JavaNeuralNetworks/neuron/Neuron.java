@@ -9,11 +9,12 @@ public abstract class Neuron implements NervousImpulseSource {
 	// derivada parcial do erro em relação a entrada total no neuronio
 	protected double error = Double.NaN;
 	protected double learningRate;
+	protected double currentOutput;
 
 	// input synapses
-	private HashMap<NervousImpulseSource, SynapticWeight> dendrites = new HashMap<NervousImpulseSource, SynapticWeight>();
+	protected HashMap<NervousImpulseSource, SynapticWeight> dendrites = new HashMap<NervousImpulseSource, SynapticWeight>();
 	// output synapses
-	private HashMap<Neuron, SynapticWeight> axon = new HashMap<Neuron, SynapticWeight>();
+	protected HashMap<Neuron, SynapticWeight> axon = new HashMap<Neuron, SynapticWeight>();
 
 	public void addInputSynapse(NervousImpulseSource source, SynapticWeight weight) {
 		dendrites.put(source, weight);
@@ -23,10 +24,13 @@ public abstract class Neuron implements NervousImpulseSource {
 	}
 
 	public void addOutputSynapse(Neuron receptor, SynapticWeight weight) {
-
+		axon.put(receptor, weight);
+		receptor.addInputSynapse(this, weight);
 	}
 
-	protected abstract void calculateError();
+	public abstract void calculateOutput();
+
+	public abstract void calculateError();
 
 	public abstract void adjustWeights();
 

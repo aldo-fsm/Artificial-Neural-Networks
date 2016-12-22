@@ -7,6 +7,10 @@ public class SynapticWeight {
 		this.value = value;
 	}
 
+	public void add(double increment) {
+		value += increment;
+	}
+
 	public double getValue() {
 		return value;
 	}
