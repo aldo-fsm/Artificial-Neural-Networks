@@ -1,50 +1,41 @@
 package com.github.aldofsm.JavaNeuralNetworks.training;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 public class TrainingCase {
 
-	private List<Double> inputs;
-	private List<Double> desiredOutputs;
+	private double[] inputs;
+	private double[] desiredOutputs;
 
 	public TrainingCase(int numberInputs, int numberOutputs, double... values) {
 
-		inputs = new ArrayList<Double>();
-		desiredOutputs = new ArrayList<Double>();
+		inputs = new double[numberInputs];
+		desiredOutputs = new double[numberOutputs];
 
 		for (int i = 0; i < values.length; i++) {
 			if (i < numberInputs)
-				inputs.add(values[i]);
+				inputs[i] = values[i];
 			else
-				desiredOutputs.add(values[i]);
+				desiredOutputs[i - numberInputs] = values[i];
 		}
 
 	}
 
 	public TrainingCase(double[] inputs, double[] outputs) {
-		this.inputs = new ArrayList<Double>();
-		this.desiredOutputs = new ArrayList<Double>();
-
-		for (Double value : inputs) {
-			this.inputs.add(value);
-		}
-
-		for (Double value : outputs) {
-			this.desiredOutputs.add(value);
-		}
+		this.inputs = inputs;
+		this.desiredOutputs = outputs;
 	}
 
-	public List<Double> getInputs() {
+	public double[] getInputs() {
 		return inputs;
 	}
 
-	public List<Double> getDesiredOutput() {
+	public double[] getDesiredOutput() {
 		return desiredOutputs;
 	}
 
 	@Override
 	public String toString() {
-		return inputs + " -> " + desiredOutputs;
+		return Arrays.toString(inputs) + " -> " + Arrays.toString(desiredOutputs);
 	}
 }

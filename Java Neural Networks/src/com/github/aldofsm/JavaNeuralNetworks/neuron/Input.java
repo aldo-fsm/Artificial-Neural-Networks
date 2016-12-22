@@ -2,6 +2,8 @@ package com.github.aldofsm.JavaNeuralNetworks.neuron;
 
 public class Input implements NervousImpulseSource {
 
+	public static final Input ONE = new Input(1);
+
 	private double value = 0;
 
 	public Input(double value) {
