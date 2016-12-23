@@ -5,7 +5,6 @@ import java.util.Random;
 import java.util.function.Function;
 
 import org.ejml.simple.SimpleMatrix;
-import org.xml.sax.InputSource;
 
 import com.github.aldofsm.JavaNeuralNetworks.training.DataSet;
 
@@ -16,7 +15,7 @@ import com.github.aldofsm.JavaNeuralNetworks.training.DataSet;
  */
 public class FFNeuralNetwork {
 
-	private double learningRate;
+	private double learningRate = 0.1;
 	private double weightRandomAmplitude = 0.1;
 
 	private SimpleMatrix inputLayer;
@@ -25,17 +24,14 @@ public class FFNeuralNetwork {
 	private SimpleMatrix[] errors;
 	private SimpleMatrix[] weights;
 	private SimpleMatrix[] bias;
-	private final int inSize;
-	private final int outSize;
-	private final int numHidden;
+	private final int numInputs;
+	
 
 	private static final Function<Double, Double> SIGMOID = x -> 1 / (1 + Math.exp(-x));
 
 	public FFNeuralNetwork(int numberInputs, int numberOutputs, int... hiddenLayerSizes) {
-		numHidden = hiddenLayerSizes.length;
-		inSize = numberInputs;
-		outSize = numberOutputs;
-
+		int numHidden = hiddenLayerSizes.length;
+		numInputs = numberInputs;
 		hiddenLayers = new SimpleMatrix[hiddenLayerSizes.length];
 
 		bias = new SimpleMatrix[numHidden + 1];
@@ -56,7 +52,7 @@ public class FFNeuralNetwork {
 	}
 
 	private void forwardPropagation() {
-		int batchSize = inputLayer.numRows();
+		int batchSize = inputLayer.numCols();
 
 		SimpleMatrix totalInput = weights[0].transpose().mult(inputLayer);
 		totalInput = totalInput.plus(repMat(bias[0], 1, batchSize));
@@ -69,20 +65,25 @@ public class FFNeuralNetwork {
 			hiddenLayers[i] = applyFuncion(SIGMOID, totalInput);
 		}
 
-		totalInput = weights[weights.length - 1].transpose().mult(hiddenLayers[i]);
+		totalInput = weights[weights.length - 1].transpose().mult(hiddenLayers[i - 1]);
 		totalInput = totalInput.plus(repMat(bias[i], 1, batchSize));
 		outputLayer = applyFuncion(SIGMOID, totalInput);
 	}
 
 	private void backPropagation() {
 
-		for (int i = errors.length - 2; i >= 1; i--) {
+		for (int i = errors.length - 2; i >= 0; i--) {
 			errors[i] = weights[i + 1].mult(errors[i + 1]);
-			errors[i] = errors[i].elementMult(applyFuncion(x -> x * (1 - x), hiddenLayers[i - 1]));
+			errors[i] = errors[i].elementMult(applyFuncion(x -> x * (1 - x), hiddenLayers[i]));
 		}
-		errors[0] = weights[1].mult(errors[1]);
-		errors[0] = errors[0].elementMult(applyFuncion(x -> x * (1 - x), inputLayer));
-
+		SimpleMatrix weightGradient;
+		for (int i = 0; i < weights.length; i++) {
+			if (i == 0)
+				weightGradient = inputLayer.mult(errors[i].transpose());
+			else
+				weightGradient = hiddenLayers[i - 1].mult(errors[i].transpose());
+			weights[i] = weights[i].minus(weightGradient.scale(learningRate));
+		}
 	}
 
 	public void train(DataSet trainingData, int epochs) {
@@ -96,8 +97,17 @@ public class FFNeuralNetwork {
 				outputError = outputError.elementMult(applyFuncion(x -> x * (1 - x), outputLayer));
 				errors[errors.length - 1] = outputError;
 				backPropagation();
+				System.out.println(
+						"i = " + i + "\n" + (trainingOutputs.get(i).minus(outputLayer)).elementPower(2).divide(2));
 			}
 		}
+	}
+
+	public SimpleMatrix output(double... inputs) {
+		inputLayer = new SimpleMatrix(numInputs, 1);
+		inputLayer.setColumn(0, 0, inputs);
+		forwardPropagation();
+		return outputLayer;
 	}
 
 	private static SimpleMatrix applyFuncion(Function<Double, Double> function, SimpleMatrix matrix) {
@@ -120,6 +130,22 @@ public class FFNeuralNetwork {
 			}
 		}
 		return result;
+	}
+
+	public double getLearningRate() {
+		return learningRate;
+	}
+
+	public void setLearningRate(double learningRate) {
+		this.learningRate = learningRate;
+	}
+
+	public double getWeightRandomAmplitude() {
+		return weightRandomAmplitude;
+	}
+
+	public void setWeightRandomAmplitude(double weightRandomAmplitude) {
+		this.weightRandomAmplitude = weightRandomAmplitude;
 	}
 
 }

@@ -2,7 +2,6 @@ package com.github.aldofsm.JavaNeuralNetworks.training;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.ejml.simple.SimpleMatrix;
@@ -12,7 +11,6 @@ public class DataSet {
 	private final int numberInputs;
 	private final int numberOutputs;
 	private int miniBatchSize;
-	private int numberMiniBatches;
 
 	private List<Double[]> inputs;
 	private List<Double[]> desiredOutputs;
@@ -61,6 +59,7 @@ public class DataSet {
 	}
 
 	public List<SimpleMatrix> inputMatrixList() {
+		int numberMiniBatches = numberPartitions();
 		List<SimpleMatrix> list = new ArrayList<SimpleMatrix>();
 		for (int i = 0; i < numberMiniBatches; i++) {
 			list.add(getInputMatrix(i));
@@ -69,6 +68,7 @@ public class DataSet {
 	}
 
 	public List<SimpleMatrix> outputMatrixList() {
+		int numberMiniBatches = numberPartitions();
 		List<SimpleMatrix> list = new ArrayList<SimpleMatrix>();
 		for (int i = 0; i < numberMiniBatches; i++) {
 			list.add(getOutputMatrix(i));
@@ -97,10 +97,19 @@ public class DataSet {
 	}
 
 	public void setMiniBatchSize(int miniBatchSize) {
-		this.miniBatchSize = miniBatchSize;
-		numberMiniBatches = inputs.size() / miniBatchSize;
+		if (miniBatchSize > 0)
+			this.miniBatchSize = miniBatchSize;
+	}
+
+	public int numberPartitions() {
+		int numberMiniBatches = inputs.size() / miniBatchSize;
 		if (inputs.size() % miniBatchSize != 0)
 			numberMiniBatches++;
+		return numberMiniBatches;
+	}
+
+	public int size() {
+		return inputs.size();
 	}
 
 }

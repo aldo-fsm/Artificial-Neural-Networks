@@ -7,6 +7,5 @@ public class FFNeuralNetworkTest1 {
 
 		FFNeuralNetwork ffnn = new FFNeuralNetwork(3, 2, 2,3);
 		
-		
 	}
 }
