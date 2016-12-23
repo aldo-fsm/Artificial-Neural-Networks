@@ -1,5 +1,6 @@
 package com.github.aldofsm.JavaNeuralNetworks.tests;
 
+
 import com.github.aldofsm.JavaNeuralNetworks.training.DataSet;
 
 public class DataSetTest {
@@ -15,12 +16,8 @@ public class DataSetTest {
 		// ds.addTrainingCase(1,32,33,43,5);
 
 		ds.setMiniBatchSize(2);
-		System.out.println(ds.getInputMatrix(0));
-		System.out.println(ds.getInputMatrix(1));
-		System.out.println(ds.getInputMatrix(2));
-
-		System.out.println(ds.getOutputMatrix(0));
-		System.out.println(ds.getOutputMatrix(1));
-		System.out.println(ds.getOutputMatrix(2));
+		System.out.println(ds.inputMatrixList());
+		System.out.println(ds.outputMatrixList());
+		
 	}
 }
