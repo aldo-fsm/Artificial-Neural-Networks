@@ -15,7 +15,9 @@ import com.github.aldofsm.JavaNeuralNetworks.training.DataSet;
  */
 public class FFNeuralNetwork {
 
-	private double learningRate = 0.1;
+	private double learningRate = 1;
+	// amplitude de randomização dos pesos
+	// pesos são inicializados com valores entre -amplitude e +amplitude
 	private double weightRandomAmplitude = 0.1;
 
 	private SimpleMatrix inputLayer;
@@ -25,7 +27,6 @@ public class FFNeuralNetwork {
 	private SimpleMatrix[] weights;
 	private SimpleMatrix[] bias;
 	private final int numInputs;
-	
 
 	private static final Function<Double, Double> SIGMOID = x -> 1 / (1 + Math.exp(-x));
 
@@ -83,6 +84,8 @@ public class FFNeuralNetwork {
 			else
 				weightGradient = hiddenLayers[i - 1].mult(errors[i].transpose());
 			weights[i] = weights[i].minus(weightGradient.scale(learningRate));
+
+			bias[i] = bias[i].minus(sumColumns(errors[i]).scale(learningRate));
 		}
 	}
 
@@ -97,8 +100,7 @@ public class FFNeuralNetwork {
 				outputError = outputError.elementMult(applyFuncion(x -> x * (1 - x), outputLayer));
 				errors[errors.length - 1] = outputError;
 				backPropagation();
-				System.out.println(
-						"i = " + i + "\n" + (trainingOutputs.get(i).minus(outputLayer)).elementPower(2).divide(2));
+				System.out.println((trainingOutputs.get(i).minus(outputLayer)).elementPower(2).divide(2));
 			}
 		}
 	}
@@ -128,6 +130,14 @@ public class FFNeuralNetwork {
 			for (int j = 0; j < result.numCols(); j += m.numCols()) {
 				result = result.combine(i, j, m);
 			}
+		}
+		return result;
+	}
+
+	private static SimpleMatrix sumColumns(SimpleMatrix matrix) {
+		SimpleMatrix result = new SimpleMatrix(matrix.numRows(), 1);
+		for (int i = 0; i < matrix.numCols(); i++) {
+			result = result.plus(matrix.extractVector(false, i));
 		}
 		return result;
 	}

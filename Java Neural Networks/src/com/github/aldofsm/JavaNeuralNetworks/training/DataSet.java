@@ -35,7 +35,7 @@ public class DataSet {
 			if (i < numberInputs)
 				inputs[i] = values[i];
 			else
-				outputs[i - numberInputs] = values[i - numberInputs];
+				outputs[i - numberInputs] = values[i];
 		}
 		addTrainingCase(inputs, outputs);
 	}
