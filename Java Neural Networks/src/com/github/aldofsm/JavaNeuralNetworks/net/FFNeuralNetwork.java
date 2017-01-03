@@ -18,7 +18,7 @@ public class FFNeuralNetwork {
 	private double learningRate = 1;
 	// amplitude de randomização dos pesos
 	// pesos são inicializados com valores entre -amplitude e +amplitude
-	private double weightRandomAmplitude = 0.1;
+	private double weightRandomAmplitude = 1;
 
 	private SimpleMatrix inputLayer;
 	private SimpleMatrix[] hiddenLayers;
