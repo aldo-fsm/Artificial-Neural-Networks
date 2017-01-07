@@ -4,6 +4,7 @@ Created on 7 de jan de 2017
 @author: aldo
 '''
 
+import math
 
 class Layer:
     # pesos das entradas
@@ -53,3 +54,7 @@ class Layer:
 class SynapticWeights:
     def __init__(self, weight_matrix):
         self.matrix = weight_matrix
+        
+def sigmoid(x, a=1):
+    return 1 / (1 + math.exp(-a * x))
+        
