@@ -7,6 +7,7 @@ Created on 7 de jan de 2017
 import math
 from enum import Enum
 import numpy as np
+from numpy import matlib
 
 
 class Layer:
@@ -19,7 +20,7 @@ class Layer:
     # indica se o output ou o erro já foi calculado
     _visited = False
     
-    def __init__(self, number_units, activation_function=ActivationFuntions.SIGMOID, **kwargs):
+    def __init__(self, number_units, activation_function=ActivationFuntions.SIGMOID, learning_rate=0.1, **kwargs):
         args = {'p':1}
         args.update(kwargs)
         
@@ -33,7 +34,7 @@ class Layer:
         self.size = number_units
         
         self.bias = np.matrix([0 for _ in range(self.number_units) ]).transpose()
-
+        self.learning_rate = learning_rate
     # valores da saida atual da camada        
     @property
     def outputs(self):
@@ -45,7 +46,9 @@ class Layer:
             # calculo do somatorio de entradas na camada
             for layer in self.weights_in :
                 input_sum += self.weights_in[layer].matrix.transpose() * layer.outputs
-                
+            batch_size = input_sum.shape[1]
+            input_sum += matlib.repmat(self.bias, 1, batch_size) 
+            # calculo do output ( y = f(z) )  
             if(self.activation_function == ActivationFuntions.SIGMOID):
                 y = sigmoid(input_sum, self.p)
                 
@@ -67,13 +70,22 @@ class Layer:
     @property
     def errors(self):
         if not self._visited:
+            
             # back propagation
             error_sum = 0
             for layer in self.weights_out :
                 error_sum += self.weights_out[layer].matrix * layer.errors
-        # falta implementar
-            self.error = None  # ---------------
-        return self._error
+                
+            if(self.activation_function == ActivationFuntions.SIGMOID):
+                e = np.multiply(sigmoid_derivative(self.outputs, self.p), error_sum)
+            elif(self.activation_function == ActivationFuntions.SOFTMAX):
+                e = None  #falta implementar ------------------------------------
+            elif(self.activation_function == ActivationFuntions.LINEAR):
+                e = error_sum
+         
+            self.errors = e
+            
+        return self._errors
    
     @errors.setter
     def errors(self, value):
@@ -82,8 +94,13 @@ class Layer:
     
     # atualiza os pesos utilizando o gradiente do erro
     def update_weights(self):
-        raise NotImplementedError()
         
+        self.bias -= self.learning_rate * (self.errors.sum(axis=1))
+        
+        for layer in self.weights_in :
+            gradient = layer.outputs * (self.errors.transpose())
+            self.weights_in.matrix -= self.learning_rate * gradient
+            
 # funções de ativação
 class ActivationFuntions(Enum):
     SIGMOID = 0
