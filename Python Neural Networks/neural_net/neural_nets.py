@@ -12,6 +12,29 @@ class NeuralNetwork:
     layers = {}
     default_learning_rate = 0.1
     
+    @property
+    def input_layers(self):
+        return {k for k, v in self.layers.items() if v in self._input_layers}
+        
+    @input_layers.setter 
+    def input_layers(self, values):
+        try:
+            self._input_layers = [self.layers[name] for name in values]
+        except KeyError as e:
+            raise Exception("{0} not exists".format(e.args))
+        
+    
+    @property
+    def output_layers(self):
+        return {k for k, v in self.layers.items() if v in self._output_layers}
+        
+    @output_layers.setter 
+    def output_layers(self, values):
+        try:
+            self._output_layers = [self.layers[name] for name in values]
+        except KeyError as e:
+            raise Exception("{0} not exists".format(e.args))
+        
     def addLayer(self, name, number_units, **kwargs):
         args = {
             'af':ActivationFuntions.SIGMOID,
@@ -37,5 +60,27 @@ class NeuralNetwork:
             layer2.weights_in[layer1] = weights
 
         else :
-            raise Exception('Camada {0} ou {1} não existe'.format(layer1, layer2))
-        
+            raise Exception('Layer {0} or {1} not exists'.format(layer1, layer2))
+    
+    def _forward_prop(self):
+        outputs = [layer.outputs for layer in self._output_layers]
+        self._reset_visited()
+        return outputs
+    def _back_prop(self):
+        for i in self.input_layers :
+            for layer in i.weights_out:
+                if not layer._visited:
+                    layer.errors 
+        self._reset_visited()
+    def train(self, data_set, epochs, mini_batch_size=-1):
+        if mini_batch_size <= 0:
+            mini_batch_size = len(data_set)
+        #------------------------------------------------------------------
+        # FALTA IMPLEMENTAR
+        #------------------------------------------------------------------
+            
+    def _reset_visited(self):
+        for layer in self.layers.values():
+            layer._visited = False
+            
+            

@@ -10,6 +10,26 @@ import numpy as np
 from numpy import matlib
 
 
+# funções de ativação
+class ActivationFuntions(Enum):
+    SIGMOID = 0
+    SOFTMAX = 1
+    LINEAR = 2
+
+# peso sinaptico
+class SynapticWeights:
+    def __init__(self, weight_matrix):
+        self.matrix = weight_matrix
+
+# função sigmoide
+@np.vectorize        
+def sigmoid(x, a=1):
+    return 1 / (1 + math.exp(-a * x))
+# derivada da função sigmoide
+@np.vectorize        
+def sigmoid_derivative(y, a=1):
+    return a * y * (1 - y)
+
 class Layer:
     # pesos das entradas
     weights_in = {}
@@ -33,7 +53,7 @@ class Layer:
         # numero de neuronios da camada
         self.size = number_units
         
-        self.bias = np.matrix([0 for _ in range(self.number_units) ]).transpose()
+        self.bias = np.matrix([0 for _ in range(self.size) ]).transpose()
         self.learning_rate = learning_rate
     # valores da saida atual da camada        
     @property
@@ -101,22 +121,3 @@ class Layer:
             gradient = layer.outputs * (self.errors.transpose())
             self.weights_in.matrix -= self.learning_rate * gradient
             
-# funções de ativação
-class ActivationFuntions(Enum):
-    SIGMOID = 0
-    SOFTMAX = 1
-    LINEAR = 2
-
-# peso sinaptico
-class SynapticWeights:
-    def __init__(self, weight_matrix):
-        self.matrix = weight_matrix
-
-# função sigmoide
-@np.vectorize        
-def sigmoid(x, a=1):
-    return 1 / (1 + math.exp(-a * x))
-# derivada da função sigmoide
-@np.vectorize        
-def sigmoid_derivative(y, a=1):
-    return a * y * (1 - y)
