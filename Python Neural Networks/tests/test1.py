@@ -8,10 +8,10 @@ import neural_net.neural_nets as nn
 
 ann1 = nn.NeuralNetwork()
  
-ann1.addLayer("l1", 10)
-ann1.addLayer("l2", 15)
-ann1.addLayer("l3", 3)
-ann1.addLayer("l4", 4)
+ann1.add_layer("l1", 10)
+ann1.add_layer("l2", 15)
+ann1.add_layer("l3", 3)
+ann1.add_layer("l4", 4)
 
 ann1.connect('l1', 'l2', 3)
 

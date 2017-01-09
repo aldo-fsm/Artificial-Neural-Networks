@@ -21,7 +21,7 @@ class NeuralNetwork:
         try:
             self._input_layers = [self.layers[name] for name in values]
         except KeyError as e:
-            raise Exception("{0} not exists".format(e.args))
+            raise ValueError("{0} not exists".format(e.args))
         
     
     @property
@@ -33,9 +33,9 @@ class NeuralNetwork:
         try:
             self._output_layers = [self.layers[name] for name in values]
         except KeyError as e:
-            raise Exception("{0} not exists".format(e.args))
+            raise ValueError("{0} not exists".format(e.args))
         
-    def addLayer(self, name, number_units, **kwargs):
+    def add_layer(self, name, number_units, **kwargs):
         args = {
             'af':ActivationFuntions.SIGMOID,
             'lr':self.default_learning_rate,
@@ -60,7 +60,7 @@ class NeuralNetwork:
             layer2.weights_in[layer1] = weights
 
         else :
-            raise Exception('Layer {0} or {1} not exists'.format(layer1, layer2))
+            raise ValueError('Layer {0} or {1} not exists'.format(layer1, layer2))
     
     def _forward_prop(self):
         outputs = [layer.outputs for layer in self._output_layers]
