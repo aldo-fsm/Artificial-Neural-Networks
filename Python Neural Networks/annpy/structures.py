@@ -37,8 +37,10 @@ class Layer:
     # pesos das saidas
     weights_out = {}
     
-    # indica se o output ou o erro já foi calculado
-    _visited = False
+    # indica se o output já foi calculado
+    _output_ready = False
+    # indica se o erro já foi calculado
+    _error_ready = False
     
     def __init__(self, number_units, activation_function=ActivationFuntions.SIGMOID, learning_rate=0.1, **kwargs):
         args = {'p':1}
@@ -59,7 +61,7 @@ class Layer:
     @property
     def outputs(self):
         
-        if not self._visited:
+        if not self._output_ready:
             # forward propagation 
             input_sum = 0
             
@@ -84,12 +86,12 @@ class Layer:
     @outputs.setter
     def outputs(self, value):
         self._outputs = value
-        self._visited = True
+        self._output_ready = True
         
     # derivada do erro em relação ao input
     @property
     def errors(self):
-        if not self._visited:
+        if not self._error_ready:
             
             # back propagation
             error_sum = 0
@@ -110,7 +112,7 @@ class Layer:
     @errors.setter
     def errors(self, value):
         self._errors = value
-        self._visited = True
+        self._error_ready = True
     
     # atualiza os pesos utilizando o gradiente do erro
     def update_weights(self):

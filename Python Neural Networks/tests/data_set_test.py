@@ -3,7 +3,7 @@ Created on 8 de jan de 2017
 
 @author: aldo
 '''
-from neural_net.training import DataSet
+from annpy.training import DataSet
 
 data = DataSet()
 

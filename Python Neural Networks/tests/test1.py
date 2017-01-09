@@ -4,7 +4,7 @@ Created on 8 de jan de 2017
 @author: aldo
 '''
 
-import neural_net.neural_nets as nn
+import annpy.neural_nets as nn
 
 ann1 = nn.NeuralNetwork()
  
