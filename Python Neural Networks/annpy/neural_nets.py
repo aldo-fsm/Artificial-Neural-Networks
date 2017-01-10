@@ -106,7 +106,7 @@ class NeuralNetwork:
             aux0 += 1
             
         for _ in range(epochs):
-            for mb_index in range(mini_batch_size):
+            for mb_index in range(len(training_matrices)):
                 aux0 = 0
                 for layer in self._input_layers:
                     layer.outputs = inputs[mb_index][aux0]
@@ -123,20 +123,21 @@ class NeuralNetwork:
                 
                 aux0 = 0
                 for layer in self._output_layers:
-                    layer.erros = errors[mb_index][aux0]
+                    layer.errors = errors[mb_index][aux0]
                     aux0 += 1
                 
                 self._back_prop()
                 
                 for layer in self.layers.values():
-                    layer.update_weights()
+                    if layer not in self._input_layers:
+                        layer.update_weights()
                     
     
     def output(self, *inputs):
         aux = 0
         for layer in self._input_layers:
             matrix = np.matrix(inputs[aux:layer.size])
-            layer.outputs = matrix
+            layer.outputs = matrix.transpose()
             aux += layer.size
         return self._forward_prop()
                     

@@ -117,9 +117,9 @@ class Layer:
     # atualiza os pesos utilizando o gradiente do erro
     def update_weights(self):
         
-        self.bias -= self.learning_rate * (self.errors.sum(axis=1))
+        self.bias = self.bias - self.learning_rate * (self.errors.sum(axis=1))
         
         for layer in self.weights_in :
             gradient = layer.outputs * (self.errors.transpose())
-            self.weights_in.matrix -= self.learning_rate * gradient
+            self.weights_in[layer].matrix -= self.learning_rate * gradient
             
