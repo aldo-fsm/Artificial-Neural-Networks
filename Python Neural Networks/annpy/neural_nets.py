@@ -14,12 +14,14 @@ from mpmath import matrix
 
 
 class NeuralNetwork:
-    
-    layers = {}
-    default_learning_rate = 0.1
-    error_funtion = ErrorFunctions.SQUARED_ERROR
-    _input_layers = []
-    _output_layers = []
+        
+    def __init__(self):
+        self.default_learning_rate = 0.1
+        self.layers = {}
+        self.error_funtion = ErrorFunctions.SQUARED_ERROR
+        self._input_layers = []
+        self._output_layers = []
+
     
     @property
     def input_layers(self):
@@ -123,7 +125,7 @@ class NeuralNetwork:
                 
                 aux0 = 0
                 for layer in self._output_layers:
-                    layer.errors = errors[mb_index][aux0]
+                    layer.errors = errors[aux0]
                     aux0 += 1
                 
                 self._back_prop()
@@ -131,7 +133,13 @@ class NeuralNetwork:
                 for layer in self.layers.values():
                     if layer not in self._input_layers:
                         layer.update_weights()
-                    
+    def weights_between(self, layer1, layer2):
+        layer1 = self.layers[layer1]
+        layer2 = self.layers[layer2]
+        return layer2.weights_in[layer1].matrix
+    def in_weights_of(self, layer):
+        layer = self.layers[layer]
+        return [weights.matrix for weights in layer.weights_in.values()], layer.bias
     
     def output(self, *inputs):
         aux = 0

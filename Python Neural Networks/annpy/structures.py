@@ -31,16 +31,7 @@ def sigmoid_derivative(y, a=1):
     return a * y * (1 - y)
 
 class Layer:
-    # pesos das entradas
-    weights_in = {}
-    
-    # pesos das saidas
-    weights_out = {}
-    
-    # indica se o output já foi calculado
-    _output_ready = False
-    # indica se o erro já foi calculado
-    _error_ready = False
+
     
     def __init__(self, number_units, activation_function=ActivationFuntions.SIGMOID, learning_rate=0.1, **kwargs):
         args = {'p':1}
@@ -57,6 +48,17 @@ class Layer:
         
         self.bias = np.matrix([0 for _ in range(self.size) ]).transpose()
         self.learning_rate = learning_rate
+        
+        # pesos das entradas
+        self.weights_in = {}
+        # pesos das saidas
+        self.weights_out = {}
+
+        # indica se o output já foi calculado
+        self._output_ready = False
+        # indica se o erro já foi calculado
+        self._error_ready = False
+
     # valores da saida atual da camada        
     @property
     def outputs(self):
