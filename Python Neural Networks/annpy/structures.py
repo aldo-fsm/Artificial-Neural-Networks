@@ -24,7 +24,10 @@ class SynapticWeights:
 # função sigmoide
 @np.vectorize        
 def sigmoid(x, a=1):
-    return 1 / (1 + math.exp(-a * x))
+    try:
+        return  1 / (1 + math.exp(-a * x))
+    except OverflowError:
+        return 0
 # derivada da função sigmoide
 @np.vectorize        
 def sigmoid_derivative(y, a=1):
