@@ -7,7 +7,8 @@ Created on 7 de jan de 2017
 import numpy as np
 
 from annpy.training import ErrorFunctions
-from annpy.structures import ActivationFuntions, Layer, SynapticWeights
+from annpy.structures import ActivationFuntions, Layer, SynapticWeights, \
+    sigmoid_derivative
 from mpmath import matrix
 
 
@@ -72,7 +73,25 @@ class NeuralNetwork:
 
         else :
             raise ValueError('Layer {0} or {1} not exists'.format(layer1, layer2))
-    
+    def _input(self, input_matrix):
+        aux = 0
+        for layer in self._input_layers:
+            layer.outputs = input_matrix[aux:aux + layer.size]
+            aux += layer.size
+    def _output_layer_error(self, targets_matrix):
+        aux = 0
+        if self.error_funtion == ErrorFunctions.SQUARED_ERROR:
+            for layer in self._output_layers:
+                target = targets_matrix[aux: aux + layer.size]
+                errors = layer.outputs - target
+                if layer.activation_function == ActivationFuntions.SIGMOID:
+                    errors = np.multiply(sigmoid_derivative(layer.outputs, layer.p), errors)
+                elif layer.activation_function == ActivationFuntions.SOFTMAX:
+                    raise NotImplementedError()
+                layer.errors = errors
+                aux += layer.size
+        elif self.error_funtion == ErrorFunctions.CROSS_ENTROPY:
+            raise NotImplementedError()
     def _forward_prop(self):
         self._reset_output()
         outputs = [layer.outputs for layer in self._output_layers]
@@ -83,56 +102,33 @@ class NeuralNetwork:
             for layer in i.weights_out:
                 if not layer._error_ready:
                     layer.errors 
-    def train(self, data_set, epochs, mini_batch_size=-1):
+    def train(self, data_set, epochs, mini_batch_size=-1, **kwargs):
         if mini_batch_size <= 0:
             mini_batch_size = len(data_set)  # full batch
         
         training_matrices = data_set.training_matrices(mini_batch_size)
         
-        in_sizes = [layer.size for layer in self._input_layers]
-        out_sizes = [layer.size for layer in self._output_layers]
+        number_inputs = sum([layer.size for layer in self._input_layers])
         
-        inputs = []
-        targets = []
-        aux0 = 0
+        input_matrices = []
+        target_matrices = []
         for matrix in training_matrices:
-            aux1 = 0
-            inputs.append([])
-            targets.append([])
-            for size in in_sizes:
-                inputs[aux0].append(matrix[aux1:aux1 + size])
-                aux1 += size
-            for size in out_sizes:
-                targets[aux0].append(matrix[aux1:aux1 + size])
-                aux1 += size
-            aux0 += 1
+            input_matrices.append(matrix[:number_inputs])
+            target_matrices.append(matrix[number_inputs:])
             
         for _ in range(epochs):
             for mb_index in range(len(training_matrices)):
-                aux0 = 0
-                for layer in self._input_layers:
-                    layer.outputs = inputs[mb_index][aux0]
-                    aux0 += 1
-                
-                outputs = self._forward_prop()
-                
-                errors = []
-                if self.error_funtion == ErrorFunctions.SQUARED_ERROR:
-                    for i in range(len(targets[mb_index])):
-                        errors.append(outputs[i] - targets[mb_index][i])    
-                elif self.error_funtion == ErrorFunctions.CROSS_ENTROPY:
-                    raise NotImplementedError()
-                
-                aux0 = 0
-                for layer in self._output_layers:
-                    layer.errors = errors[aux0]
-                    aux0 += 1
-                
+
+                self._input(input_matrices[mb_index])
+                self._forward_prop()
+                self._output_layer_error(target_matrices[mb_index])
                 self._back_prop()
                 
+                # atualiza todos os pesos e bias da rede
                 for layer in self.layers.values():
                     if layer not in self._input_layers:
                         layer.update_weights()
+
     def weights_between(self, layer1, layer2):
         layer1 = self.layers[layer1]
         layer2 = self.layers[layer2]
@@ -142,13 +138,10 @@ class NeuralNetwork:
         return [weights.matrix for weights in layer.weights_in.values()], layer.bias
     
     def output(self, *inputs):
-        aux = 0
-        for layer in self._input_layers:
-            matrix = np.matrix(inputs[aux:layer.size])
-            layer.outputs = matrix.transpose()
-            aux += layer.size
+        input_matrix = np.matrix(inputs).transpose()
+        self._input(input_matrix)
         return self._forward_prop()
-                    
+               
     def _reset_output(self):
         for layer in self.layers.values():
             if layer not in self._input_layers:
@@ -158,5 +151,6 @@ class NeuralNetwork:
         for layer in self.layers.values():
             if layer not in self._output_layers:
                 layer._error_ready = False
+                
             
             

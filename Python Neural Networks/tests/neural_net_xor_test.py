@@ -8,7 +8,7 @@ from annpy.training import DataSet
 
 
 ann = NeuralNetwork()
-
+ann.default_learning_rate = 1
 ann.add_layer('input', 2)
 ann.add_layer('hidden', 5)
 ann.add_layer('output', 1)
