@@ -33,7 +33,7 @@ ann.connect('i', 'h1', 1)
 ann.connect('h1', 'o', 1)
 
 x, y = function(-5, 5, 0.1, lambda x: x ** 2)
-y_noise = [i + 1*(2 * random() - 1) for i in y]
+y_noise = [i + 1 * (2 * random() - 1) for i in y]
 
 training_data = DataSet()
 for i in range(len(x)) :
@@ -41,6 +41,7 @@ for i in range(len(x)) :
 print(len(training_data))
 
 ann.train(training_data, 1000)
+
 
 print(ann.output(3))
 
@@ -51,4 +52,3 @@ plt.plot(x, [float(ann.output(i)[0]) for i in x], 'r')
 plt.plot(x, y_noise, 'g')
 plt.plot(x, y, 'b')
 plt.show()
-

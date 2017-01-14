@@ -19,7 +19,6 @@ class NeuralNetwork:
     def __init__(self):
         self.default_learning_rate = 0.1
         self.layers = {}
-        self.error_funtion = ErrorFunctions.SQUARED_ERROR
         self._input_layers = []
         self._output_layers = []
 
@@ -35,6 +34,9 @@ class NeuralNetwork:
         except KeyError as e:
             raise ValueError("{0} not exists".format(e.args))
         
+    def set_error_functions(self, *values):
+        for i in range(values):
+            self._output_layers[i]._error_function = values[i]
     
     @property
     def output_layers(self):
@@ -44,6 +46,8 @@ class NeuralNetwork:
     def output_layers(self, *values):
         try:
             self._output_layers = [self.layers[name] for name in values]
+            for layer in self._output_layers:
+                layer._error_function = ErrorFunctions.SQUARED_ERROR
         except KeyError as e:
             raise ValueError("{0} not exists".format(e.args))
         
@@ -78,20 +82,34 @@ class NeuralNetwork:
         for layer in self._input_layers:
             layer.outputs = input_matrix[aux:aux + layer.size]
             aux += layer.size
+    def _output_layer_error_derivative(self, targets_matrix):
+        aux = 0
+        for layer in self._output_layers:
+            target = targets_matrix[aux: aux + layer.size]
+            
+            if layer._error_function == ErrorFunctions.SQUARED_ERROR:
+                errors = layer.outputs - target
+            elif layer._error_function == ErrorFunctions.CROSS_ENTROPY:
+                raise NotImplementedError()
+
+            if layer.activation_function == ActivationFuntions.SIGMOID:
+                errors = np.multiply(sigmoid_derivative(layer.outputs, layer.p), errors)
+            elif layer.activation_function == ActivationFuntions.SOFTMAX:
+                raise NotImplementedError()
+            
+            layer.errors = errors
+            aux += layer.size
     def _output_layer_error(self, targets_matrix):
         aux = 0
-        if self.error_funtion == ErrorFunctions.SQUARED_ERROR:
-            for layer in self._output_layers:
-                target = targets_matrix[aux: aux + layer.size]
-                errors = layer.outputs - target
-                if layer.activation_function == ActivationFuntions.SIGMOID:
-                    errors = np.multiply(sigmoid_derivative(layer.outputs, layer.p), errors)
-                elif layer.activation_function == ActivationFuntions.SOFTMAX:
-                    raise NotImplementedError()
-                layer.errors = errors
-                aux += layer.size
-        elif self.error_funtion == ErrorFunctions.CROSS_ENTROPY:
-            raise NotImplementedError()
+        for layer in self._output_layers:
+            target = targets_matrix[aux: aux + layer.size]
+            
+            if layer._error_function == ErrorFunctions.SQUARED_ERROR:
+                errors = np.power(layer.outputs - target, 2) * 0.5
+            elif layer._error_function == ErrorFunctions.CROSS_ENTROPY:
+                raise NotImplementedError()
+            
+            return np.sum(errors)
     def _forward_prop(self):
         self._reset_output()
         outputs = [layer.outputs for layer in self._output_layers]
@@ -102,11 +120,11 @@ class NeuralNetwork:
             for layer in i.weights_out:
                 if not layer._error_ready:
                     layer.errors 
-    def train(self, data_set, epochs, mini_batch_size=-1, **kwargs):
+    def train(self, training_set, epochs, mini_batch_size=-1, **kwargs):
         if mini_batch_size <= 0:
-            mini_batch_size = len(data_set)  # full batch
-        
-        training_matrices = data_set.training_matrices(mini_batch_size)
+            mini_batch_size = len(training_set)  # full batch
+                
+        training_matrices = training_set.training_matrices(mini_batch_size)
         
         number_inputs = sum([layer.size for layer in self._input_layers])
         
@@ -121,8 +139,12 @@ class NeuralNetwork:
 
                 self._input(input_matrices[mb_index])
                 self._forward_prop()
-                self._output_layer_error(target_matrices[mb_index])
+                self._output_layer_error_derivative(target_matrices[mb_index])
                 self._back_prop()
+                
+                if 'error_list' in kwargs :
+                    error = self._output_layer_error(target_matrices[mb_index])
+                    kwargs['error_list'].append(error)
                 
                 # atualiza todos os pesos e bias da rede
                 for layer in self.layers.values():
