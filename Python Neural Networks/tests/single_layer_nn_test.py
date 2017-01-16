@@ -9,7 +9,7 @@ from annpy.training import DataSet
 ann1 = NeuralNetwork()
 
 ann1.add_layer("input", 2)
-ann1.add_layer("output", 1, lr=1,p=5)
+ann1.add_layer("output", 1, lr=1, p=5)
 ann1.input_layers = 'input'
 ann1.output_layers = 'output'
 ann1.connect('input', 'output', 2)
@@ -24,5 +24,5 @@ print(ann1.in_weights_of('output'))
 ann1.train(data, 100)
 print(ann1.in_weights_of('output'))
 
-print(ann1.output([1, 1],[1,0],[0,1],[0,0]))
+print(ann1.output([1, 1], [1, 0], [0, 1], [0, 0]))
 
