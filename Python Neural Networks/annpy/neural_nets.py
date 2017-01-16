@@ -8,12 +8,77 @@ import numpy as np
 
 from annpy.training import ErrorFunctions
 from annpy.structures import ActivationFuntions, Layer, SynapticWeights, \
-    sigmoid_derivative
-from mpmath import matrix
+    sigmoid_derivative, sigmoid
 
 
 
-
+class EchoStateNetwork:
+    
+    def __init__(self, number_inputs, number_hidden, number_outputs):
+        self.number_inputs = number_inputs
+        self.number_hidden = number_hidden
+        self.number_outputs = number_outputs
+    
+        self.hidden_state = np.matrix(np.zeros([number_hidden, 1]))
+        
+        self.bias_o = np.matrix(np.zeros((number_outputs, 1)))
+        self.bias_h = np.matrix(np.zeros((number_hidden, 1)))
+        
+        self.output_list = []
+    
+    def set_input_hidden_weights(self, random_amplitude):
+        self.ih_weights = np.matrix(np.random.randn(self.number_inputs, self.number_hidden) * random_amplitude)
+        
+    def set_hidden_hidden_weights(self, random_amplitude, sparseness):
+        
+        if sparseness < 0 or sparseness > 1:
+            raise ValueError('sparseness deve estar entre 0 e 1')
+        
+        hh_weights = np.random.randn(self.number_hidden, self.number_hidden) * random_amplitude
+        number_zeros = int(hh_weights.size * sparseness)
+        for _ in range(number_zeros):
+            i = np.random.randint(self.number_hidden)
+            j = np.random.randint(self.number_hidden)
+            while hh_weights[i, j] == 0 :
+                if i < self.number_hidden - 1 :
+                    i += 1
+                elif j < self.number_hidden - 1 :
+                    j += 1
+                    i = 0
+                else:
+                    i, j = 0, 0
+            hh_weights[i, j] = 0
+        self.hh_weights = np.matrix(hh_weights)
+        
+    def set_hidden_output_weights(self, random_amplitude):
+        self.ho_weights = np.matrix(np.random.randn(self.number_hidden, self.number_outputs) * random_amplitude)
+    
+    def set_hidden_bias(self, random_amplitude):
+        self.bias_h = np.matrix(np.random.randn(self.number_hidden, 1) * random_amplitude)
+    
+    
+    def output(self, *inputs):
+        
+        input_matrices = []            
+        outputs = []
+        for i in range(int(len(inputs) / self.number_inputs)):
+            aux = i * self.number_inputs
+            line = inputs[aux:aux + self.number_inputs]
+            input_matrices.append(np.matrix(line).transpose())
+        for matrix in input_matrices:
+            input_sum = self.bias_h + self.ih_weights.transpose() * matrix \
+                + self.hh_weights.transpose() * self.hidden_state
+             
+            self.hidden_state = sigmoid(input_sum, 1)
+        
+            output = self.bias_o + self.ho_weights.transpose() * self.hidden_state
+            outputs.append(output)
+        self.output_list.append(outputs)
+        return outputs
+    def reset(self):
+        self.output_list = []
+        self.hidden_state = np.matrix(np.zeros([self.number_hidden, 1]))
+        
 class NeuralNetwork:
         
     def __init__(self):
@@ -70,7 +135,7 @@ class NeuralNetwork:
             layer1 = self.layers[layer1]
             layer2 = self.layers[layer2]
             
-            random_matrix = (1 - 2 * np.random.rand(layer1.size, layer2.size)) * weight_randomization
+            random_matrix = np.random.randn(layer1.size, layer2.size) * weight_randomization
             weights = SynapticWeights(random_matrix)
             layer1.weights_out[layer2] = weights
             layer2.weights_in[layer1] = weights
