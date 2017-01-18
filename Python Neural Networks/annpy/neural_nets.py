@@ -24,7 +24,9 @@ class EchoStateNetwork:
         self.bias_o = np.matrix(np.zeros((number_outputs, 1)))
         self.bias_h = np.matrix(np.zeros((number_hidden, 1)))
         
+        self.hidden_state_list = []
         self.output_list = []
+        self.learning_rate = 0.1
     
     def set_input_hidden_weights(self, random_amplitude):
         self.ih_weights = np.matrix(np.random.randn(self.number_inputs, self.number_hidden) * random_amplitude)
@@ -56,29 +58,80 @@ class EchoStateNetwork:
     def set_hidden_bias(self, random_amplitude):
         self.bias_h = np.matrix(np.random.randn(self.number_hidden, 1) * random_amplitude)
     
-    
+    def fprop(self):
+        
+        outputs = []
+        input_matrices = []
+        
+        for i in range(int(len(self.input) / self.number_inputs)):
+            aux = i * self.number_inputs
+            matrix = self.input[aux:aux + self.number_inputs]
+            input_matrices.append(self.input[aux:aux + self.number_inputs])
+        for matrix in input_matrices:
+            if len(self.hidden_state_list) == 0:
+                self.hidden_state = np.matrix(np.zeros([self.number_hidden, matrix.shape[1]]))
+            input_sum = self.bias_h + self.ih_weights.transpose() * matrix \
+                + self.hh_weights.transpose() * self.hidden_state 
+            self.hidden_state = sigmoid(input_sum, 1)
+            self.hidden_state_list.append(self.hidden_state)
+            output = self.bias_o + self.ho_weights.transpose() * self.hidden_state
+            self.output_list.append(output)
+            outputs.append(output)
+            
+        return outputs
     def output(self, *inputs):
         
-        input_matrices = []            
-        outputs = []
-        for i in range(int(len(inputs) / self.number_inputs)):
-            aux = i * self.number_inputs
-            line = inputs[aux:aux + self.number_inputs]
-            input_matrices.append(np.matrix(line).transpose())
-        for matrix in input_matrices:
-            input_sum = self.bias_h + self.ih_weights.transpose() * matrix \
-                + self.hh_weights.transpose() * self.hidden_state
-             
-            self.hidden_state = sigmoid(input_sum, 1)
+        self.input = np.matrix(inputs).transpose()
+        return self.fprop()
         
-            output = self.bias_o + self.ho_weights.transpose() * self.hidden_state
-            outputs.append(output)
-        self.output_list.append(outputs)
-        return outputs
     def reset(self):
         self.output_list = []
-        self.hidden_state = np.matrix(np.zeros([self.number_hidden, 1]))
+        self.hidden_state_list = []
+    def train(self, training_set, epochs, mini_batch_size=-1, **kwargs):
+        if mini_batch_size <= 0:
+            mini_batch_size = len(training_set)  # full batch
+                
+        training_matrices = training_set.training_matrices(mini_batch_size)
         
+        input_matrices = []
+        target_matrices = []
+        
+        for matrix in training_matrices:
+            number_inputs = int(len(matrix) * self.number_inputs / (self.number_inputs + self.number_outputs))
+            
+            input_matrices.append(matrix[:number_inputs])
+            target_matrices.append(matrix[number_inputs:])
+            
+        for _ in range(epochs):
+            for mb_index in range(len(training_matrices)):
+                self.reset()
+                
+                self.input = input_matrices[mb_index]
+                self.fprop()
+                
+                aux = 0
+                errors = []
+                for output in self.output_list:
+                    errors.append(output - target_matrices[mb_index][aux:aux + self.number_outputs])
+                    aux += self.number_outputs
+                aux = 0
+                gradients = []
+                for error in errors:
+                    gradients.append(self.hidden_state_list[aux] * error.transpose()) 
+                    aux += 1
+                self.ho_weights = self.ho_weights - self.learning_rate * sum(gradients)
+                
+                self.bias_o = self.bias_o - self.learning_rate * (sum(errors).sum(axis=1))
+                
+                if 'error_list' in kwargs :
+                    aux = 0
+                    errors = []                
+                    for output in self.output_list:
+                        errors.append(0.5 * np.power(output - target_matrices[mb_index][aux:aux + self.number_outputs], 2))
+                        aux += self.number_outputs
+                    kwargs['error_list'].append(np.sum(sum(errors)))
+        self.reset()
+    
 class NeuralNetwork:
         
     def __init__(self):
