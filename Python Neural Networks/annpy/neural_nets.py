@@ -271,6 +271,7 @@ class NeuralNetwork:
                         layer.update_weights()
             number_epochs += 1
             
+            error /= len(training_matrices)
             if 'error_list' in kwargs :
                 kwargs['error_list'].append(error)
             if 'acceptable_error' in kwargs :

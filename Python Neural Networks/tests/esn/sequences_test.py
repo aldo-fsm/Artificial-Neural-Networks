@@ -26,7 +26,7 @@ training_set.add_training_case(*sequence[:-1], *sequence[1:])
 
 errors = []
 
-esn.train(training_set, 5000, error_list=errors)
+esn.train(training_set, 5000, error_list=errors, acceptable_error=0.1)
 
 plt.plot(errors)
 plt.show()
