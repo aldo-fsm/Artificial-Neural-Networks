@@ -41,7 +41,7 @@ ann.train(training_data, 1000)
 
 ax = plt.gca()
 ax.grid(True)
-plt.plot(x, [float(ann.output(i)[0]) for i in x],'r')
+plt.plot(x, [float(ann.output(i)[0]) for i in x], 'r')
 plt.plot(x, y_noise, 'g')
 plt.plot(x, y, 'b')
 plt.show()

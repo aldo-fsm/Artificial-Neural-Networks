@@ -23,7 +23,7 @@ class DataSet:
             raise ValueError('Not divisible by {0}'.format(mini_batch_size))
    
     def __str__(self):
-        return str(self._data)
+        return input_string(self._data)
     def __len__(self):
         return self._data.shape[1]
 

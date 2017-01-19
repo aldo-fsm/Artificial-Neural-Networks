@@ -16,7 +16,7 @@ ann1.add_layer("input", 2)
 ann1.add_layer("output", 1, lr=1, p=5)
 ann1.input_layers = 'input'
 ann1.output_layers = 'output'
-ann1.connect('input', 'output', 2)
+ann1.connect('input', 'output', 1)
 
 data = DataSet()
 data.add_training_case(1, 1, 1)
@@ -25,7 +25,8 @@ data.add_training_case(0, 1, 1)
 data.add_training_case(0, 0, 0)
 
 print(ann1.in_weights_of('output'))
-ann1.train(data, 500)
+n = ann1.train(data, 10000, acceptable_error=0.01)
+print('trained with {} epochs'.format(n))
 print(ann1.in_weights_of('output'))
 
 print(ann1.output([1, 1], [1, 0], [0, 1], [0, 0]))

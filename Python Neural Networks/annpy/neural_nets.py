@@ -251,8 +251,10 @@ class NeuralNetwork:
         for matrix in training_matrices:
             input_matrices.append(matrix[:number_inputs])
             target_matrices.append(matrix[number_inputs:])
-            
+        
+        number_epochs = 0
         for _ in range(epochs):
+            error = 0
             for mb_index in range(len(training_matrices)):
 
                 self._input(input_matrices[mb_index])
@@ -260,14 +262,21 @@ class NeuralNetwork:
                 self._output_layer_error_derivative(target_matrices[mb_index])
                 self._back_prop()
                 
-                if 'error_list' in kwargs :
-                    error = self._output_layer_error(target_matrices[mb_index])
-                    kwargs['error_list'].append(error)
+                error += self._output_layer_error(target_matrices[mb_index])
+                
                 
                 # atualiza todos os pesos e bias da rede
                 for layer in self.layers.values():
                     if layer not in self._input_layers:
                         layer.update_weights()
+            number_epochs += 1
+            
+            if 'error_list' in kwargs :
+                kwargs['error_list'].append(error)
+            if 'acceptable_error' in kwargs :
+                if error <= kwargs['acceptable_error'] :
+                    break
+        return number_epochs        
 
     def weights_between(self, layer1, layer2):
         layer1 = self.layers[layer1]
