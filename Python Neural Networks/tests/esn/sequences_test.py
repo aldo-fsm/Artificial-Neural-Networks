@@ -16,8 +16,8 @@ print(*sequence[:-1], *sequence[1:])
 
 esn = EchoStateNetwork(1, 10, 1)
 esn.learning_rate = 0.05
-esn.set_input_hidden_weights(0.1)
-esn.set_hidden_hidden_weights(0.1, 0.7)
+esn.set_input_hidden_weights(0.2)
+esn.set_hidden_hidden_weights(0.3, 0.7)
 esn.set_hidden_bias(1)
 esn.set_hidden_output_weights(0.1)
 
@@ -26,7 +26,7 @@ training_set.add_training_case(*sequence[:-1], *sequence[1:])
 
 errors = []
 
-esn.train(training_set, 5000, error_list=errors, acceptable_error=0.1)
+esn.train(training_set, 5000, error_list=errors)
 
 plt.plot(errors)
 plt.show()
