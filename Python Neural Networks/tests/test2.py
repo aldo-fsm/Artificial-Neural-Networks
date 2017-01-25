@@ -10,7 +10,6 @@ import numpy as np
 from annpy.neural_nets import NeuralNetwork
 from annpy.structures import ActivationFuntions
 from annpy.training import DataSet
-from random import random
 
 
 ann = NeuralNetwork()
@@ -29,7 +28,7 @@ noise = 10
 
 x = np.arange(-5, 5, 0.2)
 y = np.vectorize(lambda x : x ** 3)(x)
-y_noise = [i + noise * (2 * random() - 1) for i in y]
+y_noise = [i + noise * np.random.randn() for i in y]
 
 training_data = DataSet()
 for i in range(len(x)) :

@@ -16,10 +16,10 @@ print(*sequence[:-1], *sequence[1:])
 
 esn = EchoStateNetwork(1, 10, 1)
 esn.learning_rate = 0.05
-esn.set_input_hidden_weights(0.2)
-esn.set_hidden_hidden_weights(0.3, 0.7)
+esn.set_input_hidden_weights(0.04)
+esn.set_hidden_hidden_weights(0.09, 0.7)
 esn.set_hidden_bias(1)
-esn.set_hidden_output_weights(0.1)
+esn.set_hidden_output_weights(0.01)
 
 training_set = DataSet()
 training_set.add_training_case(*sequence[:-1], *sequence[1:])

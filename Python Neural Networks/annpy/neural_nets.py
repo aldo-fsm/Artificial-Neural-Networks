@@ -28,20 +28,21 @@ class EchoStateNetwork:
         self.output_list = []
         self.learning_rate = 0.1
     
-    def set_input_hidden_weights(self, random_amplitude):
-        self.ih_weights = np.matrix(np.random.randn(self.number_inputs, self.number_hidden) * random_amplitude)
+    def set_input_hidden_weights(self, variance):
+        self.ih_weights = np.matrix(np.random.randn(self.number_inputs, self.number_hidden) * variance ** 0.5)
         
-    def set_hidden_hidden_weights(self, random_amplitude, sparseness):
+    def set_hidden_hidden_weights(self, variance, sparseness):
         
         if sparseness < 0 or sparseness > 1:
             raise ValueError('sparseness deve estar entre 0 e 1')
         
-        hh_weights = np.random.randn(self.number_hidden, self.number_hidden) * random_amplitude
+        hh_weights = np.matrix(np.random.randn(self.number_hidden, self.number_hidden) * variance ** 0.5)
         number_zeros = int(hh_weights.size * sparseness)
         for _ in range(number_zeros):
             i = np.random.randint(self.number_hidden)
             j = np.random.randint(self.number_hidden)
-            while hh_weights[i, j] == 0 :
+            aux = 0
+            while hh_weights[i, j] == 0 and aux < hh_weights.size:
                 if i < self.number_hidden - 1 :
                     i += 1
                 elif j < self.number_hidden - 1 :
@@ -49,14 +50,15 @@ class EchoStateNetwork:
                     i = 0
                 else:
                     i, j = 0, 0
+                aux += 1
             hh_weights[i, j] = 0
         self.hh_weights = np.matrix(hh_weights)
         
-    def set_hidden_output_weights(self, random_amplitude):
-        self.ho_weights = np.matrix(np.random.randn(self.number_hidden, self.number_outputs) * random_amplitude)
+    def set_hidden_output_weights(self, variance):
+        self.ho_weights = np.matrix(np.random.randn(self.number_hidden, self.number_outputs) * variance ** 0.5)
     
-    def set_hidden_bias(self, random_amplitude):
-        self.bias_h = np.matrix(np.random.randn(self.number_hidden, 1) * random_amplitude)
+    def set_hidden_bias(self, variance):
+        self.bias_h = np.matrix(np.random.randn(self.number_hidden, 1) * variance ** 0.5)
     
     def fprop(self):
         
@@ -181,14 +183,14 @@ class NeuralNetwork:
             layer.p = args['p']
         self.layers[name] = layer
         
-    def connect(self, layer1, layer2, weight_randomization=0.1):
+    def connect(self, layer1, layer2, variance=1):
         
         if layer1 in self.layers and layer2 in self.layers:
             
             layer1 = self.layers[layer1]
             layer2 = self.layers[layer2]
             
-            random_matrix = np.random.randn(layer1.size, layer2.size) * weight_randomization
+            random_matrix = np.random.randn(layer1.size, layer2.size) * variance ** 0.5
             weights = SynapticWeights(random_matrix)
             layer1.weights_out[layer2] = weights
             layer2.weights_in[layer1] = weights
