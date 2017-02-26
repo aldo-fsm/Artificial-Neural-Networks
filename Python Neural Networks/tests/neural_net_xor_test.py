@@ -29,6 +29,7 @@ data.add_training_case(1, 0, 1)
 data.add_training_case(0, 1, 1)
 data.add_training_case(0, 0, 0)
 
+
 n, errors = ann.train(data, 1000, acceptable_error=0.01)
 print('trained with {} epochs'.format(n))
 

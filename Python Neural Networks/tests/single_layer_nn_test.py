@@ -10,6 +10,8 @@ import numpy as np
 from annpy.neural_nets import NeuralNetwork
 from annpy.training import DataSet
 
+
+
 ann1 = NeuralNetwork()
 
 ann1.add_layer("input", 2)

@@ -39,7 +39,6 @@ for i in range(len(x)) :
         validation_data.add_training_case(x[i], y[i])
         
     
-
 print("treinando com {} exemplos".format(len(training_data)))
 
 n, training_errors, validation_errors = ann.train(training_data, 1000, val_set=validation_data)

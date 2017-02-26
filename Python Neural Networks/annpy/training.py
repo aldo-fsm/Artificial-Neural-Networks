@@ -7,6 +7,7 @@ Created on 8 de jan de 2017
 import numpy as np
 from enum import Enum
 
+
 class DataSet:
     
     def add_training_case(self, *values):
