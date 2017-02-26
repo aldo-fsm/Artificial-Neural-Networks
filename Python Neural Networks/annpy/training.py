@@ -22,8 +22,6 @@ class DataSet:
         else :
             raise ValueError('Not divisible by {0}'.format(mini_batch_size))
    
-    def __str__(self):
-        return input_string(self._data)
     def __len__(self):
         return self._data.shape[1]
 
