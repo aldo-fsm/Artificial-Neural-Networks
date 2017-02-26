@@ -29,9 +29,7 @@ data.add_training_case(1, 0, 1)
 data.add_training_case(0, 1, 1)
 data.add_training_case(0, 0, 0)
 
-errors = []
-
-n = ann.train(data, 1000, error_list=errors, acceptable_error=0.01)
+n, errors = ann.train(data, 1000, acceptable_error=0.01)
 print('trained with {} epochs'.format(n))
 
 print(ann.output(1, 1))
@@ -39,6 +37,8 @@ print(ann.output(1, 0))
 print(ann.output(0, 1))
 print(ann.output(0, 0))
 
+plt.plot(errors)
+plt.show()
 
 x = np.linspace(-0.5, 1.5, 50)
 y = np.linspace(-0.5, 1.5, 50)
@@ -57,5 +57,3 @@ plt.axis([-0.5, 1.5, -0.5, 1.5])
 plt.show()
 
 
-# plt.plot(errors)
-# plt.show()

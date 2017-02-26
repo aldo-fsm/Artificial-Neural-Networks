@@ -15,28 +15,38 @@ from annpy.training import DataSet
 ann = NeuralNetwork()
 ann.default_learning_rate = 0.001
 ann.add_layer('i', 1)
-ann.add_layer('h1', 100)
+ann.add_layer('h1', 10)
 ann.add_layer('o', 1, af=ActivationFuntions.LINEAR)
 
 ann.input_layers = 'i'
 ann.output_layers = 'o'
 
-ann.connect('i', 'h1', 1)
-ann.connect('h1', 'o', 1)
+ann.connect('i', 'h1', 0.5)
+ann.connect('h1', 'o', 0.5)
 
-noise = 10
+noise = 3
 
 x = np.arange(-5, 5, 0.2)
 y = np.vectorize(lambda x : x ** 3)(x)
 y_noise = [i + noise * np.random.randn() for i in y]
 
 training_data = DataSet()
+validation_data = DataSet()
 for i in range(len(x)) :
-    training_data.add_training_case(x[i], y_noise[i])
+    if i % 2 == 0:
+        training_data.add_training_case(x[i], y_noise[i])
+    else :
+        validation_data.add_training_case(x[i], y[i])
+        
+    
 
 print("treinando com {} exemplos".format(len(training_data)))
 
-ann.train(training_data, 1000)
+n, training_errors, validation_errors = ann.train(training_data, 1000, val_set=validation_data)
+
+plt.plot(training_errors)
+plt.plot(validation_errors)
+plt.show()
 
 ax = plt.gca()
 ax.grid(True)

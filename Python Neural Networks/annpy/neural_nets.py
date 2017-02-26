@@ -243,7 +243,10 @@ class NeuralNetwork:
     def train(self, training_set, epochs, mini_batch_size=-1, **kwargs):
         if mini_batch_size <= 0:
             mini_batch_size = len(training_set)  # full batch
-                
+        
+        has_val_set = 'val_set' in kwargs
+        if has_val_set :
+            validation_matrix = kwargs['val_set'].training_matrices(len(kwargs['val_set']))[0]   
         training_matrices = training_set.training_matrices(mini_batch_size)
         
         number_inputs = sum([layer.size for layer in self._input_layers])
@@ -252,11 +255,19 @@ class NeuralNetwork:
         target_matrices = []
         for matrix in training_matrices:
             input_matrices.append(matrix[:number_inputs])
-            target_matrices.append(matrix[number_inputs:])
+            target_matrices.append(matrix[number_inputs:])        
+        
+        if has_val_set:
+            validation_input_matrix = validation_matrix[:number_inputs]
+            validation_target_matrix = validation_matrix[number_inputs:]
+            
+        vs_error_list = []
+        ts_error_list = []
         
         number_epochs = 0
         for _ in range(epochs):
-            error = 0
+            print('\nepoch {}'.format(number_epochs + 1))
+            training_set_error = 0
             for mb_index in range(len(training_matrices)):
 
                 self._input(input_matrices[mb_index])
@@ -264,22 +275,33 @@ class NeuralNetwork:
                 self._output_layer_error_derivative(target_matrices[mb_index])
                 self._back_prop()
                 
-                error += self._output_layer_error(target_matrices[mb_index])
-                
+                training_set_error += self._output_layer_error(target_matrices[mb_index])
                 
                 # atualiza todos os pesos e bias da rede
                 for layer in self.layers.values():
                     if layer not in self._input_layers:
                         layer.update_weights()
+            if has_val_set :
+                    self._input(validation_input_matrix)
+                    self._forward_prop()        
+                    validation_set_error = self._output_layer_error(validation_target_matrix)
             number_epochs += 1
             
-            error /= len(training_matrices)
-            if 'error_list' in kwargs :
-                kwargs['error_list'].append(error)
+            training_set_error /= len(training_set)
+            ts_error_list.append(training_set_error)
+            print('Training set error : {}'.format(training_set_error))
+            if has_val_set :
+                validation_set_error /= len(kwargs['val_set'])
+                vs_error_list.append(validation_set_error)
+                print('Validation set error : {}'.format(validation_set_error))
+            
             if 'acceptable_error' in kwargs :
-                if error <= kwargs['acceptable_error'] :
+                if training_set_error <= kwargs['acceptable_error'] :
                     break
-        return number_epochs        
+        return_list = [number_epochs, ts_error_list]
+        if has_val_set:
+            return_list.append(vs_error_list)
+        return tuple(return_list)   
 
     def weights_between(self, layer1, layer2):
         layer1 = self.layers[layer1]
