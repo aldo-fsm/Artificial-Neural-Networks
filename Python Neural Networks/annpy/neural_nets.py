@@ -227,7 +227,7 @@ class NeuralNetwork:
             if layer._error_function == ErrorFunctions.SQUARED_ERROR:
                 errors = np.power(layer.outputs - target, 2) * 0.5
             elif layer._error_function == ErrorFunctions.CROSS_ENTROPY:
-                raise NotImplementedError()
+                errors = np.multiply(-target, np.log(layer.outputs))
             
             return np.sum(errors)
     def _forward_prop(self):
