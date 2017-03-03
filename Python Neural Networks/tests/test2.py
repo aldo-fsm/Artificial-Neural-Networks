@@ -36,7 +36,7 @@ for i in range(len(x)) :
     if i % 2 == 0:
         training_data.add_training_case(x[i], y_noise[i])
     else :
-        validation_data.add_training_case(x[i], y[i])
+        validation_data.add_training_case(x[i], y_noise[i])
         
     
 print("treinando com {} exemplos".format(len(training_data)))

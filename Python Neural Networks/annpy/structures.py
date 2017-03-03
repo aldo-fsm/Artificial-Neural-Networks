@@ -80,7 +80,8 @@ class Layer:
                 y = sigmoid(input_sum, self.p)
                 
             elif(self.activation_function == ActivationFuntions.SOFTMAX):
-                y = None  # falta implementar -------------------------------------
+                aux = np.exp(input_sum)
+                y = aux / np.sum(aux, 0)
             
             elif(self.activation_function == ActivationFuntions.LINEAR):
                 y = input_sum
