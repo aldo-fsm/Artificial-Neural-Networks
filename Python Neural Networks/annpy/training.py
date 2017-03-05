@@ -22,7 +22,11 @@ class DataSet:
             return [matrix[:, i:i + mini_batch_size] for i in range(0, len(self), mini_batch_size)]
         else :
             raise ValueError('Not divisible by {0}'.format(mini_batch_size))
-   
+    def load(self, file):
+        for line in file:
+            aux = line.split(',')
+            self.add_training_case(*[int(c) for c in aux])    
+    
     def __len__(self):
         return self._data.shape[1]
 

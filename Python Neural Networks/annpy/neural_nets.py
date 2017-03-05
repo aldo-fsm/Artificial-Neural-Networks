@@ -155,7 +155,7 @@ class NeuralNetwork:
             raise ValueError("{0} not exists".format(e.args))
         
     def set_error_functions(self, *values):
-        for i in range(values):
+        for i in range(len(values)):
             self._output_layers[i]._error_function = values[i]
     
     @property

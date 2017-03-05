@@ -82,7 +82,7 @@ class Layer:
             elif(self.activation_function == ActivationFuntions.SOFTMAX):
                 aux = np.exp(input_sum)
                 y = aux / np.sum(aux, 0)
-            
+                
             elif(self.activation_function == ActivationFuntions.LINEAR):
                 y = input_sum
             self.outputs = y
@@ -104,13 +104,10 @@ class Layer:
             for layer in self.weights_out :
                 error_sum += self.weights_out[layer].matrix * layer.errors
                 
-            if(self.activation_function == ActivationFuntions.SIGMOID):
+            if(self.activation_function == ActivationFuntions.SIGMOID or self.activation_function == ActivationFuntions.SOFTMAX):
                 e = np.multiply(sigmoid_derivative(self.outputs, self.p), error_sum)
-            elif(self.activation_function == ActivationFuntions.SOFTMAX):
-                e = None  #falta implementar ------------------------------------
             elif(self.activation_function == ActivationFuntions.LINEAR):
                 e = error_sum
-         
             self.errors = e
             
         return self._errors
