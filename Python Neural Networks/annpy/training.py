@@ -26,6 +26,15 @@ class DataSet:
         for line in file:
             aux = line.split(',')
             self.add_training_case(*[int(c) for c in aux])    
+    def split(self, *subsets_sizes):
+        subsets = [DataSet() for _ in subsets_sizes]
+        aux = 0
+        for i in range(len(subsets_sizes)):
+            subsets[i]._data = self._data[:, aux:aux + subsets_sizes[i]]
+            aux += subsets_sizes[i]
+        return tuple(subsets)
+    def randomize(self):
+        np.random.shuffle(np.transpose(self._data))
     
     def __len__(self):
         return self._data.shape[1]
