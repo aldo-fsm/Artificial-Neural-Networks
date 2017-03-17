@@ -207,6 +207,7 @@ class NeuralNetwork:
         for layer in self._output_layers:
             target = targets_matrix[aux: aux + layer.size]
             
+            
             if layer.activation_function == ActivationFuntions.SOFTMAX:
                 if layer._error_function == ErrorFunctions.CROSS_ENTROPY:
                     errors = layer.outputs - target
@@ -215,11 +216,11 @@ class NeuralNetwork:
             else:
                 if layer._error_function == ErrorFunctions.SQUARED_ERROR:
                     errors = layer.outputs - target
-                elif layer._error_function == ErrorFunctions.CROSS_ENTROPY:
-                    raise NotImplementedError()
-
                 if layer.activation_function == ActivationFuntions.SIGMOID:
-                    errors = np.multiply(sigmoid_derivative(layer.outputs, layer.p), errors)
+                    if layer._error_function == ErrorFunctions.CROSS_ENTROPY:
+                        errors = layer.outputs - target
+                    else:
+                        errors = np.multiply(sigmoid_derivative(layer.outputs, layer.p), errors)
             
             layer.errors = errors
             aux += layer.size
